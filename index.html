@@ -1,0 +1,245 @@
+<!doctype html>
+<html>
+<head>
+	<meta charset="UTF-8">
+	<!-- Meta tags for mobile -->
+
+	<meta name="apple-mobile-web-app-capable" content="yes">
+	<meta name="mobile-web-app-capable" content="yes">
+	<link rel="shortcut icon" href="favicon.ico">
+	<link rel="apple-touch-icon" href="meta/apple-touch-icon.png">
+	<meta name="apple-mobile-web-app-status-bar-style" content="black">
+	<meta name="HandheldFriendly" content="True">
+	<meta name="MobileOptimized" content="720">
+	<meta name="viewport" content="width=device-width, target-densitydpi=300dpi, initial-scale=1.0, maximum-scale=1, user-scalable=no, minimal-ui">
+	<meta name="format-detection" content="telephone=no" />
+	<title>amazio</title>
+	<!-- This game is inspired by a gfycat I saved.. Aim was to make a game in under an hour before I went out to Boris and Pete's party. Dec 17th 2016 -->
+	<!-- https://gfycat.com/ImpureOpulentBirdofparadise -->
+	<!-- Here goes! -->
+
+	<style>
+		html,body{
+			margin:0;
+
+		}
+		body{
+			background-color: #eee;
+		}
+		#canvas-container {
+			width: 100%;
+			text-align:center;
+		}
+	</style>
+</head>
+
+<body>
+	<div id="canvas-container">
+		<canvas id="canvas" width="200" height="100" style="border: solid grey 1px">
+		</canvas>
+	</div>
+
+	<script>
+//0,0 is top left in Canvas
+var mobileRatio = 9/16;
+var height = window.innerHeight;
+var width=height / (16/9);
+
+// Player globals
+var player={};
+var mouse={};
+var gravity=.91/2;
+var keymovepower=0.55;
+var friction = 0.95;
+
+// Amazio
+var amazio={
+	centerx: width /2,
+	centery: height/2,
+	segments: 30
+};
+
+function init() {
+	canvas.width  = width
+	canvas.height = height;
+	canvas.imageSmoothingEnabled = true;
+
+	player.x=width/2; //Init player
+	player.y=80;
+	player.xspeed=0;
+	player.yspeed=0;
+}
+
+function drawGame(){
+	var ctx = canvas.getContext("2d");
+	//draw Ball
+	ctx.clearRect(0, 0, canvas.width, canvas.height);
+	ctx.beginPath();
+	ctx.arc(player.x,player.y,19 * mobileRatio,0,2*Math.PI);
+	ctx.stroke();
+	ctx.fill();
+
+	//draw Amazio
+	ctx.beginPath();
+											//90% of mobilescreen width
+	ctx.arc(amazio.centerx,amazio.centery, width * 0.45,0,2*Math.PI);
+	ctx.stroke();
+
+	//draw starting lines
+	var length=height;
+	var anglebetweenpoints= (360.0/amazio.segments);
+	for (var i = 0.0; i < amazio.segments; i++) {
+		var angle = i  * anglebetweenpoints;
+		angle = angle * Math.PI / 180;
+		ctx.beginPath();
+		ctx.moveTo(amazio.centerx,amazio.centery);
+		ctx.lineTo( amazio.centerx + length * Math.sin(angle) , amazio.centerx +length *  Math.cos(angle));
+		ctx.stroke();
+
+		//touch pos
+		ctx.beginPath();
+		//distance center + Mouse.x
+		var xdif = mouse.x - amazio.centerx;
+		var ydif = mouse.y - amazio.centery;
+		ctx.arc(mouse.x,mouse.y, 2,0,2*Math.PI);
+		ctx.lineTo(amazio.centerx + xdif * Math.sin(angle) , amazio.centerx +ydif *  Math.cos(angle));
+		ctx.stroke();
+
+
+
+
+	}
+
+	//Draw Touch pos
+
+
+}
+
+function updateGame(){
+	//Gravity + movement
+	player.yspeed+=gravity;
+	if (player.jumpCountdown!=0)
+		player.jumpCountdown--;
+	//Calculate key movement for old school keyboards.
+	if (keys[37])	//Left arrow
+		player.xspeed-=keymovepower;
+	if (keys[39])	//Right arrow
+		player.xspeed+=keymovepower;
+
+	//Calculate gyro into player pos
+	player.xspeed*=friction;
+	//floor
+	if (player.y>=height - 50){
+		player.yspeed=0;
+	}
+	//Update player pos
+	player.x+=player.xspeed;
+	player.y+=player.yspeed;
+
+	if (player.x<0)
+		player.x=width;
+	if (player.x>width)
+		player.x=0;
+	
+	if (player.dead)
+		init()	
+}
+
+init()
+ 
+var keys = [];
+window.onkeyup = function(e) {keys[e.keyCode]=false;}
+window.onkeydown = function(e) {keys[e.keyCode]=true;}
+
+//Game Loop
+var ONE_FRAME_TIME = 1000 / 60 ;
+var mainloop = function() {
+	updateGame();
+	drawGame();
+};
+setInterval( mainloop, ONE_FRAME_TIME );
+
+
+// Mouse!
+
+//Bind mouse move
+document.onmousedown = function() {
+	// console.log("mouse down");
+	mouse.down=true;
+	mouse.startx=mouse.x;
+	mouse.starty=mouse.y
+
+}
+document.onmouseup = function() {
+	// console.log("mouse up");
+	if (mouse.down){
+		mouse.down=false;
+		mouse.startx=null;
+		mouse.starty=null;
+	}
+}
+
+document.onmousemove = function(e) {
+	// console.log("mouse move");
+	e = e || window.event
+	mouse.x = e.clientX;
+	mouse.y = e.clientY;
+}
+
+//Bind touch to mouse
+canvas.addEventListener("touchstart", handleStart, false);
+canvas.addEventListener("touchend", handleEnd, false);
+  // canvas.addEventListener("touchcanccanvas", handleCancel, false);
+  canvas.addEventListener("touchmove", handleMove, false);
+
+
+function handleStart(evt) {
+	// evt.preventDefault();
+	var touches = evt.changedTouches;
+
+	for (var i = 0; i < touches.length; i++) {
+		console.log("touchstart:" + i + "...");
+		ongoingTouches.push(copyTouch(touches[i]));
+
+	}
+}
+function handleEnd(evt) {
+	evt.preventDefault();
+	var touches = evt.changedTouches;
+	document.onmouseup();
+
+	for (var i = 0; i < touches.length; i++) {
+		var idx = ongoingTouchIndexById(touches[i].identifier);
+		if (idx >= 0) {
+      ongoingTouches.splice(idx, 1);  // remove it; we're done
+  } else {
+  	console.log("can't figure out which touch to end");
+  }
+}
+}
+
+function handleMove(evt) {
+	evt.preventDefault();
+	var el = document.getElementsByTagName("canvas")[0];
+	var ctx = el.getContext("2d");
+	var touches = evt.changedTouches;
+
+	for (var i = 0; i < touches.length; 	i++) {
+    // var color = colorForTouch(touches[i]);
+    var idx = ongoingTouchIndexById(touches[i].identifier);
+
+    if (idx >= 0) {
+    	mouse.x = touches[i].pageX;
+    	mouse.y = touches[i].pageY;
+
+      ongoingTouches.splice(idx, 1, copyTouch(touches[i]));  // swap in the new touch record
+      console.log(".");
+  } else {
+  	console.log("can't figure out which touch to continue");
+  }
+}
+}
+
+</script>
+</body>
+</html>
