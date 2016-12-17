@@ -51,6 +51,8 @@ var mouse={};
 var gravity=.91/2;
 var keymovepower=0.55;
 var friction = 0.95;
+var ongoingTouches = new Array();
+
 
 // Amazio
 var amazio={
@@ -101,8 +103,19 @@ function drawGame(){
 		//distance center + Mouse.x
 		var xdif = mouse.x - amazio.centerx;
 		var ydif = mouse.y - amazio.centery;
-		ctx.arc(mouse.x,mouse.y, 2,0,2*Math.PI);
+
+		ctx.moveTo(amazio.centerx,amazio.centery);
+		// ctx.arc(mouse.x,mouse.y, 2,0,2*Math.PI);
+
+		// var angleRadians = Math.atan2(p2.y - p1.y, p2.x - p1.x);
+		var angleofmouse =  Math.atan2(mouse.y - amazio.centery, mouse.x - amazio.centerx.x);
 		ctx.lineTo(amazio.centerx + xdif * Math.sin(angle) , amazio.centerx +ydif *  Math.cos(angle));
+
+
+		var angleofmouse =  Math.atan2(ydif, xdif) * i ;
+		ctx.lineTo(amazio.centerx + xdif * Math.sin(angleofmouse) , amazio.centerx +ydif *  Math.cos(angleofmouse));
+		ctx.stroke();
+		
 		ctx.stroke();
 
 
@@ -193,6 +206,18 @@ canvas.addEventListener("touchend", handleEnd, false);
   canvas.addEventListener("touchmove", handleMove, false);
 
 
+  function ongoingTouchIndexById(idToFind) {
+  	for (var i = 0; i < ongoingTouches.length; i++) {
+  		var id = ongoingTouches[i].identifier;
+
+  		if (id == idToFind) {
+  			return i;
+  		}
+  	}
+  return -1;    // not found
+}
+
+
 function handleStart(evt) {
 	// evt.preventDefault();
 	var touches = evt.changedTouches;
@@ -216,6 +241,11 @@ function handleEnd(evt) {
   	console.log("can't figure out which touch to end");
   }
 }
+}
+
+
+function copyTouch(touch) {
+	return { identifier: touch.identifier, pageX: touch.pageX, pageY: touch.pageY };
 }
 
 function handleMove(evt) {
