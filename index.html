@@ -285,6 +285,10 @@ function handleMove(evt) {
 
       ongoingTouches.splice(idx, 1, copyTouch(touches[i]));  // swap in the new touch record
       console.log(".");
+      if(mouse.down){		
+		drawpoints.push({x:mouse.x - width/2,y:mouse.y - height/2});
+		// addDrawData(mouse.x,mouse.y);
+	}
   } else {
   	console.log("can't figure out which touch to continue");
   }
