@@ -240,6 +240,7 @@ canvas.addEventListener("touchend", handleEnd, false);
 
 function handleStart(evt) {
 	// evt.preventDefault();
+	document.onmousedown();
 	var touches = evt.changedTouches;
 
 	for (var i = 0; i < touches.length; i++) {
