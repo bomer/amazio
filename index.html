@@ -83,6 +83,7 @@ function init() {
 }
 
 function drawGame(){
+	console.log('drawing');
 	var ctx = canvas.getContext("2d");
 	//draw Ball
 	ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -121,7 +122,7 @@ function drawGame(){
 		pointx = amazio.centerx + Math.cos(angleofmouse) * hyp;
 		pointy = amazio.centery + Math.sin(angleofmouse) * hyp;
 	
-		ctx.lineTo(pointx,pointy);
+		// ctx.lineTo(pointx,pointy);
 		ctx.fillStyle="red";
 		ctx.stroke();
 		ctx.strokeStyle="black";
@@ -171,13 +172,13 @@ window.onkeyup = function(e) {keys[e.keyCode]=false;}
 window.onkeydown = function(e) {keys[e.keyCode]=true;}
 
 //Game Loop
-var ONE_FRAME_TIME = 1000 / 60 ;
+var ONE_FRAME_TIME = 1000 / 120 ;
 var mainloop = function() {
 	updateGame();
-	drawGame();
+	// drawGame();
 };
 setInterval( mainloop, ONE_FRAME_TIME );
-
+window.requestAnimationFrame(drawGame);
 
 // Mouse!
 function toggleFullScreen() {
@@ -198,6 +199,8 @@ document.onmousedown = function() {
 	mouse.startx=mouse.x;
 	mouse.starty=mouse.y
 		drawpoints.push({x:mouse.x*window.devicePixelRatio - (width/2) , y:mouse.y*window.devicePixelRatio - (height/2) });
+		window.requestAnimationFrame(drawGame);
+
 
 
 }
@@ -219,6 +222,8 @@ document.onmousemove = function(e) {
 		drawpoints.push({x:mouse.x*window.devicePixelRatio - (width/2) , y:mouse.y*window.devicePixelRatio - (height/2) });
 		// addDrawData(mouse.x,mouse.y);
 	}
+	window.requestAnimationFrame(drawGame);
+
 }
 
 function addDrawData(x,y) {
@@ -301,6 +306,8 @@ function handleMove(evt) {
 		drawpoints.push({x:mouse.x*window.devicePixelRatio - (width/2) , y:mouse.y*window.devicePixelRatio - (height/2) });
 		// addDrawData(mouse.x,mouse.y);
 	}
+	window.requestAnimationFrame(drawGame);
+
   } else {
   	console.log("can't figure out which touch to continue");
   }
