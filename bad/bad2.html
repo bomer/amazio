@@ -52,10 +52,6 @@ var gravity=.91/2;
 var keymovepower=0.55;
 var friction = 0.95;
 var ongoingTouches = new Array();
-var drawpoints=[];
-
-var imgData;
-
 
 
 // Amazio
@@ -75,9 +71,6 @@ function init() {
 	player.y=80;
 	player.xspeed=0;
 	player.yspeed=0;
-
-	var ctx = canvas.getContext("2d");
-
 }
 
 function drawGame(){
@@ -92,8 +85,7 @@ function drawGame(){
 	ctx.stroke();
 
 	//draw starting lines
-	var length=999999;
-	// amazio.segments=9;
+	var length=height;
 	var anglebetweenpoints= (360.0/amazio.segments);
 	for (var i = 0.0; i < amazio.segments; i++) {
 		var angle = i  * anglebetweenpoints;
@@ -108,44 +100,31 @@ function drawGame(){
 		//distance center + Mouse.x
 		var xdif = mouse.x - amazio.centerx;
 		var ydif = mouse.y - amazio.centery;
-		var hyp = Math.sqrt(xdif*xdif + ydif*ydif);
 		ctx.strokeStyle="red";
-
-
 		ctx.moveTo(amazio.centerx,amazio.centery);
-
-		var angleofmouse =  Math.atan2(ydif, xdif);
-		angleofmouse += angle
-		pointx = amazio.centerx + Math.cos(angleofmouse) * hyp;
-		pointy = amazio.centery + Math.sin(angleofmouse) * hyp;
-	
+		ctx.lineTo(mouse.x,mouse.y);
+		// ctx.arc(mouse.x,mouse.y, 2,0,2*Math.PI);
+		// ctx.stroke();
+		var angleofmouse =  Math.atan2(ydif, xdif) * (anglebetweenpoints * i);
+		pointx = amazio.centerx + Math.cos(angleofmouse) * amazio.radius;
+		pointy = amazio.centery + Math.sin(angleofmouse) * amazio.radius;
 		ctx.lineTo(pointx,pointy);
+		// console.log("moving to " + pointx + " "  + pointy)
+		
 		ctx.fillStyle="red";
+		ctx.lineTo(amazio.centerx + xdif * Math.sin(angleofmouse) , amazio.centerx +ydif *  Math.cos(angleofmouse));
 		ctx.stroke();
+
+		// var angleRadians = Math.atan2(p2.y - p1.y, p2.x - p1.x);
+		// var angleofmouse =  Math.atan2(mouse.y - amazio.centery, mouse.x - amazio.centerx.x);
+		// ctx.lineTo(amazio.centerx + xdif * Math.sin(angle) , amazio.centerx +ydif *  Math.cos(angle));
+		
+
+
+		// var angleofmouse =  Math.atan2(ydif, xdif) * i ;
+		// ctx.lineTo(amazio.centerx + xdif * Math.sin(angleofmouse) , amazio.centerx +ydif *  Math.cos(angleofmouse));
+		// ctx.stroke();
 		ctx.strokeStyle="black";
-
-
-		ctx.save();
-		ctx.translate(amazio.centerx, amazio.centery);
-		ctx.rotate(angle);
-		for (var x = 0; x < drawpoints.length; x++) {
-			// for (var j = 0; j < amazio.segments; j++) {
-			// 		var angle2 = j  * anglebetweenpoints;
-			// 			angle2 = angle2 * Math.PI / 180;
-			// 	var xdif2 = drawpoints[x].x - amazio.centerx;
-			// 	var ydif2 = drawpoints[x].y - amazio.centery;
-			// 	var angleofpoint =  Math.atan2(xdif2,ydif2);
-			// 	angleofpoint += angle2;
-			// 	pointx2 = amazio.centerx + Math.cos(angleofmouse) * hyp;
-			// 	pointy2 = amazio.centery + Math.sin(angleofmouse) * hyp;
-			// 	ctx.fillRect( pointx2,pointy2 , 1, 1 )
-			// }
-			ctx.fillRect( drawpoints[x].x,drawpoints[x].y , 3, 3 )
-		}
-		ctx.restore();
-		// ctx.fillRect( x, y, 1, 1 );
-
-// ctx.putImageData(imgData,0,0);
 
 
 
@@ -158,7 +137,6 @@ ctx.strokeStyle="black";
 }
 
 function updateGame(){
-	
 
 }
 
@@ -185,8 +163,6 @@ document.onmousedown = function() {
 	mouse.down=true;
 	mouse.startx=mouse.x;
 	mouse.starty=mouse.y
-	drawpoints.push({x:mouse.x,y:mouse.y});
-
 
 }
 document.onmouseup = function() {
@@ -203,20 +179,6 @@ document.onmousemove = function(e) {
 	e = e || window.event
 	mouse.x = e.clientX;
 	mouse.y = e.clientY;
-	if(mouse.down){		
-		drawpoints.push({x:mouse.x - width/2,y:mouse.y - height/2});
-		// addDrawData(mouse.x,mouse.y);
-	}
-}
-
-function addDrawData(x,y) {
-	console.log('adding');
-	// imgData.data[x*y*4]=255;
-	// imgData.data[x*y*4+1]=255;
-	// imgData.data[x*y*4+2]=255;
-	imgData.data[x*y*4+3]=255;
-	// console.log(imgData.data)
-
 }
 
 //Bind touch to mouse
