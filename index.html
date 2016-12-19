@@ -216,7 +216,7 @@ document.onmousemove = function(e) {
 	mouse.x = e.clientX;
 	mouse.y = e.clientY;
 	if(mouse.down){		
-		drawpoints.push({x:mouse.x - (width/2) * window.devicePixelRatio,y:mouse.y - (height/2) * window.devicePixelRatio });
+		drawpoints.push({x:mouse.x - (width/2) , y:mouse.y - (height/2) });
 		// addDrawData(mouse.x,mouse.y);
 	}
 }
