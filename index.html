@@ -197,7 +197,7 @@ document.onmousedown = function() {
 	mouse.down=true;
 	mouse.startx=mouse.x;
 	mouse.starty=mouse.y
-	drawpoints.push({x:mouse.x,y:mouse.y});
+		drawpoints.push({x:mouse.x*window.devicePixelRatio - (width/2) , y:mouse.y*window.devicePixelRatio - (height/2) });
 
 
 }
@@ -298,7 +298,7 @@ function handleMove(evt) {
       ongoingTouches.splice(idx, 1, copyTouch(touches[i]));  // swap in the new touch record
       console.log(".");
       if(mouse.down){		
-		drawpoints.push({x:mouse.x - width/2,y:mouse.y - height/2});
+		drawpoints.push({x:mouse.x*window.devicePixelRatio - (width/2) , y:mouse.y*window.devicePixelRatio - (height/2) });
 		// addDrawData(mouse.x,mouse.y);
 	}
   } else {
