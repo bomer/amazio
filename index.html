@@ -180,10 +180,20 @@ setInterval( mainloop, ONE_FRAME_TIME );
 
 
 // Mouse!
+function toggleFullScreen() {
+ var canvas = document.getElementById("canvas");
+    if(canvas.requestFullScreen)
+        canvas.requestFullScreen();
+    else if(canvas.webkitRequestFullScreen)
+        canvas.webkitRequestFullScreen();
+    else if(canvas.mozRequestFullScreen)
+        canvas.mozRequestFullScreen();
+}
 
 //Bind mouse move
 document.onmousedown = function() {
 	// console.log("mouse down");
+		// toggleFullScreen();
 	mouse.down=true;
 	mouse.startx=mouse.x;
 	mouse.starty=mouse.y
@@ -206,7 +216,7 @@ document.onmousemove = function(e) {
 	mouse.x = e.clientX;
 	mouse.y = e.clientY;
 	if(mouse.down){		
-		drawpoints.push({x:mouse.x - width/2,y:mouse.y - height/2});
+		drawpoints.push({x:mouse.x - (width/2) * window.devicePixelRatio,y:mouse.y - (height/2) * window.devicePixelRatio });
 		// addDrawData(mouse.x,mouse.y);
 	}
 }
