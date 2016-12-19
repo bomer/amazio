@@ -27,7 +27,7 @@
 			background-color: #eee;
 		}
 		#canvas-container {
-			width: 100%;
+			/*width: 100%;*/
 			text-align:center;
 		}
 	</style>
@@ -42,8 +42,8 @@
 	<script>
 //0,0 is top left in Canvas
 var mobileRatio = 9/16;
-var height = window.innerHeight;
-var width=height / (16/9);
+var height = window.innerHeight * window.devicePixelRatio;
+var width=window.innerWidth * window.devicePixelRatio;
 
 // Player globals
 var player={};
@@ -67,8 +67,10 @@ var amazio={
 };
 
 function init() {
-	canvas.width  = width
+	canvas.width  = width;
 	canvas.height = height;
+	document.getElementById("canvas").style.width = window.innerWidth + "px";
+	document.getElementById("canvas").style.height = window.innerHeight + "px";
 	canvas.imageSmoothingEnabled = true;
 
 	player.x=width/2; //Init player
