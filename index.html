@@ -36,6 +36,8 @@
 
 <body>
 	<div id="canvas-container">
+	<button style="position: fixed;"  onclick="selectColour()">Color</button>
+	<button style="position: fixed; right:0;"  onclick="clearScreen()">Clear</button>
 		<canvas id="canvas" width="200" height="100" style="border: solid grey 1px">
 		</canvas>
 	</div>
@@ -57,6 +59,8 @@ var drawpoints=[];
 
 var imgData;
 
+var options={};
+
 
 
 // Amazio
@@ -68,6 +72,10 @@ var amazio={
 };
 
 function init() {
+
+	
+	options.colour="red";
+	options.thickness=3;
 	canvas.width  = width;
 	canvas.height = height;
 	document.getElementById("canvas").style.width = window.innerWidth + "px";
@@ -80,6 +88,28 @@ function init() {
 	player.yspeed=0;
 
 	var ctx = canvas.getContext("2d");
+
+}
+
+function selectColour(){
+	options.colour=window.prompt("Type a colour to change to (name or #hex)","red");
+}
+
+function clearScreen(){
+	console.log("clearing");
+	var ctx = canvas.getContext("2d");	
+	ctx.clearRect(0, 0, canvas.width, canvas.height);
+	var anglebetweenpoints= (360.0/amazio.segments);
+	for (var i = 0.0; i < amazio.segments; i++) {
+		var angle = i  * anglebetweenpoints;
+		angle = angle * Math.PI / 180;
+		ctx.strokeStyle="black";
+		ctx.beginPath();
+		ctx.moveTo(amazio.centerx,amazio.centery);
+		ctx.lineTo( amazio.centerx + length * Math.sin(angle) , amazio.centerx +length *  Math.cos(angle));
+		ctx.stroke();
+	}
+	window.requestAnimationFrame(drawGame);
 
 }
 
@@ -102,6 +132,7 @@ function drawGame(){
 	for (var i = 0.0; i < amazio.segments; i++) {
 		var angle = i  * anglebetweenpoints;
 		angle = angle * Math.PI / 180;
+		ctx.strokeStyle="black";
 		ctx.beginPath();
 		ctx.moveTo(amazio.centerx,amazio.centery);
 		ctx.lineTo( amazio.centerx + length * Math.sin(angle) , amazio.centerx +length *  Math.cos(angle));
@@ -112,10 +143,9 @@ function drawGame(){
 		//distance center + Mouse.x
 		var xdif = mouse.x - amazio.centerx;
 		var ydif = mouse.y - amazio.centery;
-		var hyp = Math.sqrt(xdif*xdif + ydif*ydif);
-		ctx.strokeStyle="red";
+		var hyp = Math.sqrt(xdif*xdif + ydif*ydif);		
 
-
+		ctx.strokeStyle=options.colour;
 		ctx.moveTo(amazio.centerx,amazio.centery);
 
 		var angleofmouse =  Math.atan2(ydif, xdif);
@@ -124,14 +154,15 @@ function drawGame(){
 		pointy = amazio.centery + Math.sin(angleofmouse) * hyp;
 	
 		// ctx.lineTo(pointx,pointy);
-		ctx.fillStyle="red";
+		// ctx.fillStyle="red";
+		ctx.strokeStyle=options.colour;
 		ctx.stroke();
-		ctx.strokeStyle="black";
 
 
 		ctx.save();
 		ctx.translate(amazio.centerx, amazio.centery);
 		ctx.rotate(angle);
+		ctx.fillStyle=options.colour;
 		for (var x = 0; x < drawpoints.length; x++) {
 			// for (var j = 0; j < amazio.segments; j++) {
 			// 		var angle2 = j  * anglebetweenpoints;
