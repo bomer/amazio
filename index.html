@@ -60,6 +60,7 @@ var drawpoints=[];
 var imgData;
 
 var options={};
+var globalangle=0;
 
 
 
@@ -88,6 +89,7 @@ function init() {
 	player.yspeed=0;
 
 	var ctx = canvas.getContext("2d");
+	clearScreen();
 
 }
 
@@ -99,7 +101,15 @@ function clearScreen(){
 	console.log("clearing");
 	var ctx = canvas.getContext("2d");	
 	ctx.clearRect(0, 0, canvas.width, canvas.height);
+	var length=999999;
 	var anglebetweenpoints= (360.0/amazio.segments);
+
+	ctx.beginPath();
+											//90% of mobilescreen width
+	ctx.arc(amazio.centerx,amazio.centery, amazio.radius ,0,2*Math.PI);
+	ctx.stroke();
+
+
 	for (var i = 0.0; i < amazio.segments; i++) {
 		var angle = i  * anglebetweenpoints;
 		angle = angle * Math.PI / 180;
@@ -114,29 +124,26 @@ function clearScreen(){
 }
 
 function drawGame(){
-	console.log('drawing');
 	var ctx = canvas.getContext("2d");
 	//draw Ball
 	// ctx.clearRect(0, 0, canvas.width, canvas.height);
 
 	//draw Amazio
-	ctx.beginPath();
-											//90% of mobilescreen width
-	ctx.arc(amazio.centerx,amazio.centery, amazio.radius ,0,2*Math.PI);
-	ctx.stroke();
+	
 
 	//draw starting lines
 	var length=999999;
 	// amazio.segments=9;
 	var anglebetweenpoints= (360.0/amazio.segments);
+
 	for (var i = 0.0; i < amazio.segments; i++) {
 		var angle = i  * anglebetweenpoints;
 		angle = angle * Math.PI / 180;
-		ctx.strokeStyle="black";
-		ctx.beginPath();
-		ctx.moveTo(amazio.centerx,amazio.centery);
-		ctx.lineTo( amazio.centerx + length * Math.sin(angle) , amazio.centerx +length *  Math.cos(angle));
-		ctx.stroke();
+		// ctx.strokeStyle="black";
+		// ctx.beginPath();
+		// ctx.moveTo(amazio.centerx,amazio.centery);
+		// ctx.lineTo( amazio.centerx + length * Math.sin(angle) , amazio.centerx +length *  Math.cos(angle));
+		// ctx.stroke();
 
 		//touch pos
 		ctx.beginPath();
