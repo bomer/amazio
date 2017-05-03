@@ -31,12 +31,17 @@
 			/*width: 100%;*/
 			text-align:center;
 		}
+		button{
+			padding: 10px;
+    		font-size: medium;
+		}
 	</style>
 </head>
 
 <body>
 	<div id="canvas-container">
 	<button style="position: fixed;"  onclick="selectColour()">Color</button>
+	<button style="position: fixed; bottom:0px; left:0px;"  onclick="submit()">Submit</button>
 	<button style="position: fixed; right:0;"  onclick="clearScreen()">Clear</button>
 		<canvas id="canvas" width="200" height="100" style="border: solid grey 1px">
 		</canvas>
@@ -56,6 +61,7 @@ var keymovepower=0.55;
 var friction = 0.95;
 var ongoingTouches = new Array();
 var drawpoints=[];
+var drawHistory=[];
 
 var imgData;
 
@@ -69,13 +75,12 @@ var amazio={
 	centerx: width /2,
 	centery: height/2,
 	radius: width*0.45,
-	segments: 30
+	segments: 12
 };
 
 function init() {
 
-	
-	options.colour="red";
+	options.colour="black";
 	options.thickness=3;
 	canvas.width  = width;
 	canvas.height = height;
@@ -95,7 +100,57 @@ function init() {
 
 function selectColour(){
 	options.colour=window.prompt("Type a colour to change to (name or #hex)","red");
+	drawHistory.push(options.colour)
+
 }
+
+
+function submit(){
+	
+	console.log(JSON.stringify(drawHistory));
+
+}
+
+
+function getHighScores(){
+	var request = new XMLHttpRequest();
+	request.open('GET', '/score.php', true);
+
+	request.onload = function() {
+		if (request.status >= 200 && request.status < 400) {
+	    // Success!
+	    var data = JSON.parse(request.responseText);
+	    leaderboard=data;
+	} else {
+	    // We reached our target server, but it returned an error
+	    console.log("failed getting high scores");
+	}
+};
+
+request.onerror = function() {
+	  // There was a connection error of some sort
+	};
+
+	request.send();
+}
+
+function postHighScore(){
+	var name;
+	if (!localStorage.name || localStorage.name=="null"){
+		name = prompt("You have reach your personal high score! Please enter your name for the leaderboard: ");
+		localStorage.name=name;
+	}else{
+		name=localStorage.name;
+	}
+	var request = new XMLHttpRequest();
+	request.open('POST', '/score.php', true);
+	request.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded; charset=UTF-8');
+	request.onload = function() {
+		getHighScores();
+	};
+	request.send("name="+name+"&score=" + localStorage.highscore);
+}
+
 
 function clearScreen(){
 	console.log("clearing");
@@ -120,6 +175,7 @@ function clearScreen(){
 		ctx.stroke();
 	}
 	window.requestAnimationFrame(drawGame);
+	drawHistory=[];
 
 }
 
@@ -193,8 +249,15 @@ function drawGame(){
 
 
 	}
+	// drawHistory.push(drawpoints);
+	for (var i = 0; i < drawpoints.length; i++) {
+		if (drawpoints[i]){
+			drawHistory.push(drawpoints[i])
+		}
+	}
+	// drawHistory.pushArray(drawpoints);
 	drawpoints=[];
-ctx.strokeStyle="black";
+	ctx.strokeStyle="black";
 	//Draw Touch pos
 
 
@@ -238,7 +301,7 @@ document.onmousedown = function() {
 	mouse.down=true;
 	mouse.startx=mouse.x;
 	mouse.starty=mouse.y
-		drawpoints.push({x:mouse.x*window.devicePixelRatio - (width/2) , y:mouse.y*window.devicePixelRatio - (height/2) });
+	drawpoints.push({x:mouse.x*window.devicePixelRatio - (width/2) , y:mouse.y*window.devicePixelRatio - (height/2) });
 		window.requestAnimationFrame(drawGame);
 
 
@@ -283,6 +346,10 @@ canvas.addEventListener("touchend", handleEnd, false);
   canvas.addEventListener("touchmove", handleMove, false);
 
 
+Array.prototype.pushArray = function(arr) {
+    this.push.apply(this, arr);
+};
+
   function ongoingTouchIndexById(idToFind) {
   	for (var i = 0; i < ongoingTouches.length; i++) {
   		var id = ongoingTouches[i].identifier;
@@ -293,6 +360,8 @@ canvas.addEventListener("touchend", handleEnd, false);
   	}
   return -1;    // not found
 }
+
+
 
 
 function handleStart(evt) {
