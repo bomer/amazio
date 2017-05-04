@@ -194,6 +194,7 @@ function encodeDrawHistory(){
 
 function clearScreen(){
 	console.log("clearing");
+	mode=DRAWING;
 	var ctx = canvas.getContext("2d");	
 	ctx.clearRect(0, 0, canvas.width, canvas.height);
 	var length=999999;
@@ -344,9 +345,10 @@ document.onmousemove = function(e) {
 	mouse.y = e.clientY;
 	if(mouse.down && mode==DRAWING){		
 		drawpoints.push({x:mouse.x*window.devicePixelRatio - (width/2) , y:mouse.y*window.devicePixelRatio - (height/2) });
-		// addDrawData(mouse.x,mouse.y);
+
+		window.requestAnimationFrame(drawGame);
 	}
-	window.requestAnimationFrame(drawGame);
+	
 
 }
 
