@@ -2,21 +2,26 @@
 
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
+// ini_set('html_errors', 0);
     header('content-type:text/html;charset=utf-8');
 
 // $url = parse_url(getenv("CLEARDB_DATABASE_URL"));
 
 $server = "127.0.0.1";//$url["host"];
 $username = "root"; //$url["user"];
-$password = "root";//$url["pass"];
+$password = "password";//$url["pass"];
 $db = "draw";//substr($url["path"], 1);
 
-$data = ($_POST["data"]);
-for ($i=0; $i < strlen($data) ; $i++) { 
-	// var_dump(ord($data[$i]));
-	var_dump($data[$i]);
+if($_POST){
+	$data = ($_POST["data"]);
+	file_put_contents("raw.data", $data);
+	echo "length ".strlen($data); 
 }
-exit;
+// for ($i=0; $i < strlen($data) ; $i++) { 
+// 	// var_dump(ord($data[$i]));
+// 	var_dump($data[$i]);
+// }
+// exit;
 
 $conn = new mysqli($server, $username, $password, $db);
 // $conn = new SQLite3('test.db'); //for my minimac which didnt have MYSQL
@@ -28,9 +33,9 @@ if ($conn->query(
 	 	width int(11) NOT NULL,
 	 	height int(11) NOT NULL,
 	 	score int(11) DEFAULT 0,
-	 	data text,
+	 	data blob,
 	 	date_created timestamp NULL DEFAULT CURRENT_TIMESTAMP,
-  		date_modified timestamp NULL DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP
+  		date_modified timestamp ON UPDATE CURRENT_TIMESTAMP,
 	 	PRIMARY KEY (id)
 	)"
 )==true){
@@ -54,7 +59,7 @@ if($_SERVER['REQUEST_METHOD'] == 'POST'){
 		$sql = "INSERT INTO drawings (name, width, height, data) VALUES ('$name', '$width', '$height','$data')";
 		// echo $sql;
 		if ($conn->query($sql) === TRUE) {
-		    echo "{status:'ok', name: '$name', data: '$data'}";
+		    echo "{status:'ok', name: '$name'}";
 		} else {
 		    echo "{status: 'error', error: '$conn->error'}";
 		}
@@ -64,7 +69,7 @@ if($_SERVER['REQUEST_METHOD'] == 'POST'){
 else{	
 	// echo "get";
 	$myArray = array();
-	if ($result = $conn->query("SELECT * FROM drawings order by datecreated desc")) {
+	if ($result = $conn->query("SELECT * FROM drawings order by date_created desc limit 10")) {
 
 	    while($row = $result->fetch_array(MYSQLI_ASSOC)) {
 	            $myArray[] = $row;

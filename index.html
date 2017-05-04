@@ -3,7 +3,6 @@
 <head>
 	<meta charset="UTF-8">
 	<!-- Meta tags for mobile -->
-
 	<meta name="apple-mobile-web-app-capable" content="yes">
 	<meta name="mobile-web-app-capable" content="yes">
 	<link rel="shortcut icon" href="favicon.ico">
@@ -18,11 +17,9 @@
 	<!-- This game is inspired by a gfycat I saved.. Aim was to make a game in under an hour before I went out to Boris and Pete's party. Dec 17th 2016 -->
 	<!-- https://gfycat.com/ImpureOpulentBirdofparadise -->
 	<!-- Here goes! -->
-
 	<style>
 		html,body{
 			margin:0;
-
 		}
 		body{
 			background-color: #eee;
@@ -41,14 +38,18 @@
 <body>
 	<div id="canvas-container">
 	<button style="position: fixed;"  onclick="selectColour()">Color</button>
-	<button style="position: fixed; bottom:0px; left:0px;"  onclick="submit()">Submit</button>
 	<button style="position: fixed; right:0;"  onclick="clearScreen()">Clear</button>
+	<button style="position: fixed; bottom:0px; left:0px;"  onclick="submit()">Submit</button>
+	<button id='next' style="position: fixed; bottom:0; left:25%;"  onclick="submit()">Next</button>
+	<button id='like' style="position: fixed; bottom:0; left:75%;"  onclick="submit()">Like</button>
+	<button style="position: fixed; bottom:0;right:0;"  onclick="viewLatest()">View Top</button>
 		<canvas id="canvas" width="200" height="100" style="border: solid grey 1px">
 		</canvas>
 	</div>
 
 	<script>
 //0,0 is top left in Canvas
+var DRAWING=1;var VIEWING=2;
 var mobileRatio = 9/16;
 var height = window.innerHeight * window.devicePixelRatio;
 var width=window.innerWidth * window.devicePixelRatio;
@@ -62,13 +63,13 @@ var friction = 0.95;
 var ongoingTouches = new Array();
 var drawpoints=[];
 var drawHistory=[];
+var drawSnapshot=[];
 
 var imgData;
 
 var options={};
 var globalangle=0;
-
-
+var mode=DRAWING;
 
 // Amazio
 var amazio={
@@ -87,7 +88,8 @@ function init() {
 	document.getElementById("canvas").style.width = window.innerWidth + "px";
 	document.getElementById("canvas").style.height = window.innerHeight + "px";
 	canvas.imageSmoothingEnabled = true;
-
+	like.style.display='none';
+	next.style.display='none';
 	player.x=width/2; //Init player
 	player.y=80;
 	player.xspeed=0;
@@ -101,18 +103,16 @@ function init() {
 function selectColour(){
 	options.colour=window.prompt("Type a colour to change to (name or #hex)","red");
 	drawHistory.push(options.colour)
-
 }
-
 
 function submit(){	
 	console.log(JSON.stringify(drawHistory));
 	postDrawing();
-
 }
 
-
-function getHighScores(){
+function viewLatest(){
+	like.style.display='none';
+	next.style.display='none';
 	var request = new XMLHttpRequest();
 	request.open('GET', '/drawing.php', true);
 
@@ -121,11 +121,26 @@ function getHighScores(){
 	    // Success!
 	    var data = JSON.parse(request.responseText);
 	    leaderboard=data;
+	    clearScreen();
+	    mode=VIEWING;
+	    decodeDrawing(data[0]);
+
 	} else {
 	    // We reached our target server, but it returned an error
 	    console.log("failed getting high scores");
 	}
 };
+
+function decodeDrawing(dataobject){
+	for (var i = 0; i < dataobject.data.length; i+=2) {
+		var x=dataobject.data[i].charCodeAt(0) - dataobject.width;
+		var y=dataobject.data[i+1].charCodeAt(0)  - dataobject.height;
+		console.log('x is ' + x + ' y is ' + y);
+		drawSnapshot.push({x:x,y:y});
+	}
+	console.log(drawSnapshot);
+
+}
 
 request.onerror = function() {
 	  // There was a connection error of some sort
@@ -153,10 +168,12 @@ function postDrawing(){
 
 function encodeDrawHistory(){
 	var encoded="";
+		console.log(drawHistory);
+
 	for (var i = 0; i < drawHistory.length; i++) {
 		var element = drawHistory[i];
-		element.x+window.innerWidth;
-		element.y+window.innerHeight;
+		element.x+=window.innerWidth;
+		element.y+=window.innerHeight;
 		encoded+=String.fromCharCode(element.x);
 		encoded+=String.fromCharCode(element.y);
 	}
@@ -194,11 +211,7 @@ function clearScreen(){
 
 function drawGame(){
 	var ctx = canvas.getContext("2d");
-	//draw Ball
-	// ctx.clearRect(0, 0, canvas.width, canvas.height);
-
 	//draw Amazio
-	
 
 	//draw starting lines
 	var length=999999;
@@ -208,13 +221,7 @@ function drawGame(){
 	for (var i = 0.0; i < amazio.segments; i++) {
 		var angle = i  * anglebetweenpoints;
 		angle = angle * Math.PI / 180;
-		// ctx.strokeStyle="black";
-		// ctx.beginPath();
-		// ctx.moveTo(amazio.centerx,amazio.centery);
-		// ctx.lineTo( amazio.centerx + length * Math.sin(angle) , amazio.centerx +length *  Math.cos(angle));
-		// ctx.stroke();
 
-		//touch pos
 		ctx.beginPath();
 		//distance center + Mouse.x
 		var xdif = mouse.x - amazio.centerx;
@@ -228,57 +235,53 @@ function drawGame(){
 		angleofmouse += angle
 		pointx = amazio.centerx + Math.cos(angleofmouse) * hyp;
 		pointy = amazio.centery + Math.sin(angleofmouse) * hyp;
-	
-		// ctx.lineTo(pointx,pointy);
-		// ctx.fillStyle="red";
+
 		ctx.strokeStyle=options.colour;
 		ctx.stroke();
-
 
 		ctx.save();
 		ctx.translate(amazio.centerx, amazio.centery);
 		ctx.rotate(angle);
 		ctx.fillStyle=options.colour;
-		for (var x = 0; x < drawpoints.length; x++) {
-			// for (var j = 0; j < amazio.segments; j++) {
-			// 		var angle2 = j  * anglebetweenpoints;
-			// 			angle2 = angle2 * Math.PI / 180;
-			// 	var xdif2 = drawpoints[x].x - amazio.centerx;
-			// 	var ydif2 = drawpoints[x].y - amazio.centery;
-			// 	var angleofpoint =  Math.atan2(xdif2,ydif2);
-			// 	angleofpoint += angle2;
-			// 	pointx2 = amazio.centerx + Math.cos(angleofmouse) * hyp;
-			// 	pointy2 = amazio.centery + Math.sin(angleofmouse) * hyp;
-			// 	ctx.fillRect( pointx2,pointy2 , 1, 1 )
-			// }
-			ctx.fillRect( drawpoints[x].x,drawpoints[x].y , 3, 3 )
+
+		if(mode==DRAWING){
+			for (var x = 0; x < drawpoints.length; x++) {				
+				ctx.fillRect( drawpoints[x].x,drawpoints[x].y , 3, 3 )
+			}
+		}
+		if(mode==VIEWING){
+			var count = 0;
+			for (var x = 0; x < drawSnapshot.length; x++) {		
+				ctx.fillRect( drawSnapshot[x].x,drawSnapshot[x].y , 3, 3 )			
+				if (count++ > 5)
+					break;
+			}
 		}
 		ctx.restore();
-		// ctx.fillRect( x, y, 1, 1 );
-
-// ctx.putImageData(imgData,0,0);
-
-
-
-
+	
 	}
-	// drawHistory.push(drawpoints);
+	
+	// Save the points in the buffer into the history
 	for (var i = 0; i < drawpoints.length; i++) {
 		if (drawpoints[i]){
 			drawHistory.push(drawpoints[i])
 		}
 	}
-	// drawHistory.pushArray(drawpoints);
+	
+	//
 	drawpoints=[];
 	ctx.strokeStyle="black";
 	//Draw Touch pos
-
-
+	if(mode==VIEWING){
+		for (var i = 0; i < 5; i++) {
+			drawSnapshot.shift();	
+		}
+		window.requestAnimationFrame(drawGame);
+	}
 }
 
 function updateGame(){
 	
-
 }
 
 init()
@@ -308,20 +311,16 @@ function toggleFullScreen() {
 }
 
 //Bind mouse move
-document.onmousedown = function() {
-	// console.log("mouse down");
-		// toggleFullScreen();
+document.onmousedown = function() {	
 	mouse.down=true;
 	mouse.startx=mouse.x;
 	mouse.starty=mouse.y
+	if(mode==DRAWING){
 	drawpoints.push({x:mouse.x*window.devicePixelRatio - (width/2) , y:mouse.y*window.devicePixelRatio - (height/2) });
 		window.requestAnimationFrame(drawGame);
-
-
-
+	}
 }
 document.onmouseup = function() {
-	// console.log("mouse up");
 	if (mouse.down){
 		mouse.down=false;
 		mouse.startx=null;
@@ -330,11 +329,10 @@ document.onmouseup = function() {
 }
 
 document.onmousemove = function(e) {
-	// console.log("mouse move");
 	e = e || window.event
 	mouse.x = e.clientX;
 	mouse.y = e.clientY;
-	if(mouse.down){		
+	if(mouse.down && mode==DRAWING){		
 		drawpoints.push({x:mouse.x*window.devicePixelRatio - (width/2) , y:mouse.y*window.devicePixelRatio - (height/2) });
 		// addDrawData(mouse.x,mouse.y);
 	}
@@ -344,38 +342,29 @@ document.onmousemove = function(e) {
 
 function addDrawData(x,y) {
 	console.log('adding');
-	// imgData.data[x*y*4]=255;
-	// imgData.data[x*y*4+1]=255;
-	// imgData.data[x*y*4+2]=255;
-	imgData.data[x*y*4+3]=255;
-	// console.log(imgData.data)
-
+	imgData.data[x*y*4+3]=255;	
 }
 
 //Bind touch to mouse
 canvas.addEventListener("touchstart", handleStart, false);
 canvas.addEventListener("touchend", handleEnd, false);
-  // canvas.addEventListener("touchcanccanvas", handleCancel, false);
-  canvas.addEventListener("touchmove", handleMove, false);
-
+// canvas.addEventListener("touchcanccanvas", handleCancel, false);
+canvas.addEventListener("touchmove", handleMove, false);
 
 Array.prototype.pushArray = function(arr) {
     this.push.apply(this, arr);
 };
 
-  function ongoingTouchIndexById(idToFind) {
-  	for (var i = 0; i < ongoingTouches.length; i++) {
-  		var id = ongoingTouches[i].identifier;
+function ongoingTouchIndexById(idToFind) {
+	for (var i = 0; i < ongoingTouches.length; i++) {
+		var id = ongoingTouches[i].identifier;
 
-  		if (id == idToFind) {
-  			return i;
-  		}
-  	}
+		if (id == idToFind) {
+			return i;
+		}
+	}
   return -1;    // not found
 }
-
-
-
 
 function handleStart(evt) {
 	// evt.preventDefault();
