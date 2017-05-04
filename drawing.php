@@ -14,7 +14,7 @@ $db = "draw";//substr($url["path"], 1);
 
 if($_POST){
 	$data = ($_POST["data"]);
-	file_put_contents("raw.data", $data);
+	// file_put_contents("raw.data", $data);
 	echo "length ".strlen($data); 
 }
 // for ($i=0; $i < strlen($data) ; $i++) { 
@@ -35,7 +35,7 @@ if ($conn->query(
 	 	score int(11) DEFAULT 0,
 	 	data blob,
 	 	date_created timestamp NULL DEFAULT CURRENT_TIMESTAMP,
-  		date_modified timestamp ON UPDATE CURRENT_TIMESTAMP,
+		date_modified timestamp NOT NULL DEFAULT '0000-00-00 00:00:00' ON UPDATE CURRENT_TIMESTAMP,
 	 	PRIMARY KEY (id)
 	) DEFAULT CHARSET=utf8"
 )==true){
