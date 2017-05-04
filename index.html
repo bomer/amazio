@@ -105,16 +105,16 @@ function selectColour(){
 }
 
 
-function submit(){
-	
+function submit(){	
 	console.log(JSON.stringify(drawHistory));
+	postDrawing();
 
 }
 
 
 function getHighScores(){
 	var request = new XMLHttpRequest();
-	request.open('GET', '/score.php', true);
+	request.open('GET', '/drawing.php', true);
 
 	request.onload = function() {
 		if (request.status >= 200 && request.status < 400) {
@@ -134,23 +134,36 @@ request.onerror = function() {
 	request.send();
 }
 
-function postHighScore(){
+function postDrawing(){
 	var name;
-	if (!localStorage.name || localStorage.name=="null"){
-		name = prompt("You have reach your personal high score! Please enter your name for the leaderboard: ");
+	if (!localStorage.name || localStorage.name=="null"){		
+		name = prompt("Please enter a name for your submission");
 		localStorage.name=name;
 	}else{
 		name=localStorage.name;
 	}
 	var request = new XMLHttpRequest();
-	request.open('POST', '/score.php', true);
+	request.open('POST', '/drawing.php', true);
 	request.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded; charset=UTF-8');
 	request.onload = function() {
-		getHighScores();
+		// getHighScores();
 	};
-	request.send("name="+name+"&score=" + localStorage.highscore);
+	request.send("name="+name+"&width="+window.innerWidth + "&height=" + window.innerHeight+ "&data="+ encodeDrawHistory());
 }
 
+function encodeDrawHistory(){
+	var encoded="";
+	for (var i = 0; i < drawHistory.length; i++) {
+		var element = drawHistory[i];
+		element.x+window.innerWidth;
+		element.y+window.innerHeight;
+		encoded+=String.fromCharCode(element.x);
+		encoded+=String.fromCharCode(element.y);
+	}
+	console.log(encoded);
+	return encoded;
+
+}
 
 function clearScreen(){
 	console.log("clearing");
