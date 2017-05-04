@@ -40,8 +40,8 @@
 	<button style="position: fixed;"  onclick="selectColour()">Color</button>
 	<button style="position: fixed; right:0;"  onclick="clearScreen()">Clear</button>
 	<button style="position: fixed; bottom:0px; left:0px;"  onclick="submit()">Submit</button>
-	<button id='next' style="position: fixed; bottom:0; left:25%;"  onclick="submit()">Next</button>
-	<button id='like' style="position: fixed; bottom:0; left:75%;"  onclick="submit()">Like</button>
+	<button id='next' style="position: fixed; bottom:0; left:25%;" onclick="next()">Next</button>
+	<button id='like' style="position: fixed; bottom:0; left:75%;" onclick="like()">Like</button>
 	<button style="position: fixed; bottom:0;right:0;"  onclick="viewLatest()">View Top</button>
 		<canvas id="canvas" width="200" height="100" style="border: solid grey 1px">
 		</canvas>
@@ -64,12 +64,14 @@ var ongoingTouches = new Array();
 var drawpoints=[];
 var drawHistory=[];
 var drawSnapshot=[];
+var leaderboard;
 
 var imgData;
 
 var options={};
 var globalangle=0;
 var mode=DRAWING;
+var viewCount=0;
 
 // Amazio
 var amazio={
@@ -88,8 +90,8 @@ function init() {
 	document.getElementById("canvas").style.width = window.innerWidth + "px";
 	document.getElementById("canvas").style.height = window.innerHeight + "px";
 	canvas.imageSmoothingEnabled = true;
-	like.style.display='none';
-	next.style.display='none';
+	// like.style.display='none';
+	// next.style.display='none';
 	player.x=width/2; //Init player
 	player.y=80;
 	player.xspeed=0;
@@ -110,43 +112,51 @@ function submit(){
 	postDrawing();
 }
 
+function next(){
+	viewCount++;
+	clearScreen();
+    mode=VIEWING;
+    decodeDrawing(leaderboard[viewCount]);
+}
+
+function like(){
+	viewCount++;
+	console.log('Getting' + viewCount);
+	clearScreen();
+    mode=VIEWING;
+    decodeDrawing(leaderboard[viewCount]);
+}
+
 function viewLatest(){
-	like.style.display='none';
-	next.style.display='none';
+	// like.style.display='none';
+	// next.style.display='none';
 	var request = new XMLHttpRequest();
 	request.open('GET', 'drawing.php', true);
 
 	request.onload = function() {
-		if (request.status >= 200 && request.status < 400) {
-	    // Success!
-	    var data = JSON.parse(request.responseText);
-	    leaderboard=data;
-	    clearScreen();
-	    mode=VIEWING;
-	    decodeDrawing(data[0]);
+		if (request.status >= 200 && request.status < 400) {		
+			var data = JSON.parse(request.responseText);
+			leaderboard=data;
+			clearScreen();
+			mode=VIEWING;
+			decodeDrawing(leaderboard[viewCount]);
+		} else {
 
-	} else {
-	    // We reached our target server, but it returned an error
-	    console.log("failed getting high scores");
+			console.log("failed getting high scores");
+		}
 	}
-};
+	request.send();
+}
 
 function decodeDrawing(dataobject){
 	for (var i = 0; i < dataobject.data.length; i+=2) {
 		var x=dataobject.data[i].charCodeAt(0) - dataobject.width;
 		var y=dataobject.data[i+1].charCodeAt(0)  - dataobject.height;
-		console.log('x is ' + x + ' y is ' + y);
+		// console.log('x is ' + x + ' y is ' + y);
 		drawSnapshot.push({x:x,y:y});
 	}
 	console.log(drawSnapshot);
 
-}
-
-request.onerror = function() {
-	  // There was a connection error of some sort
-	};
-
-	request.send();
 }
 
 function postDrawing(){
@@ -272,7 +282,7 @@ function drawGame(){
 	drawpoints=[];
 	ctx.strokeStyle="black";
 	//Draw Touch pos
-	if(mode==VIEWING){
+	if(mode==VIEWING && drawSnapshot.length >0){
 		for (var i = 0; i < 5; i++) {
 			drawSnapshot.shift();	
 		}
