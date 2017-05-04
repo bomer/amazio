@@ -37,7 +37,7 @@ if ($conn->query(
 	 	date_created timestamp NULL DEFAULT CURRENT_TIMESTAMP,
   		date_modified timestamp ON UPDATE CURRENT_TIMESTAMP,
 	 	PRIMARY KEY (id)
-	)"
+	) DEFAULT CHARSET=utf8"
 )==true){
 // echo "New record created successfully";
 } else {
