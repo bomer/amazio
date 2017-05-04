@@ -39,9 +39,9 @@
 	<div id="canvas-container">
 	<button style="position: fixed;"  onclick="selectColour()">Color</button>
 	<button style="position: fixed; right:0;"  onclick="clearScreen()">Clear</button>
-	<button style="position: fixed; bottom:0px; left:0px;"  onclick="submit()">Submit</button>
-	<button id='next' style="position: fixed; bottom:0; left:25%;" onclick="next()">Next</button>
-	<button id='like' style="position: fixed; bottom:0; right:25%;" onclick="like()">Like</button>
+	<button id='submit' style="position: fixed; bottom:0px; left:0px;"  onclick="doSubmit()">Submit</button>
+	<button id='next' style="position: fixed; bottom:0; left:25%;" onclick="doNext()">Next</button>
+	<button id='like' style="position: fixed; bottom:0; right:25%;" onclick="doLike()">Like</button>
 	<button style="position: fixed; bottom:0;right:0;"  onclick="viewLatest()">View Top</button>
 		<canvas id="canvas" width="200" height="100" style="border: solid grey 1px">
 		</canvas>
@@ -107,19 +107,20 @@ function selectColour(){
 	drawHistory.push(options.colour)
 }
 
-function submit(){	
+function doSubmit(){	
 	console.log(JSON.stringify(drawHistory));
+	submit.style.display="none";
 	postDrawing();
 }
 
-function next(){
+function doNext(){
 	viewCount++;
 	clearScreen();
     mode=VIEWING;
     decodeDrawing(leaderboard[viewCount]);
 }
 
-function like(){
+function doLike(){
 	viewCount++;
 	console.log('Getting' + viewCount);
 	clearScreen();
@@ -193,6 +194,7 @@ function encodeDrawHistory(){
 }
 
 function clearScreen(){
+	submit.style.display="block";
 	console.log("clearing");
 	mode=DRAWING;
 	var ctx = canvas.getContext("2d");	
