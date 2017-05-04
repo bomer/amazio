@@ -35,7 +35,7 @@ if ($conn->query(
 	 	score int(11) DEFAULT 0,
 	 	data blob,
 	 	date_created timestamp NULL DEFAULT CURRENT_TIMESTAMP,
-		date_modified timestamp NOT NULL DEFAULT '0000-00-00 00:00:00' ON UPDATE CURRENT_TIMESTAMP,
+		date_modified timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
 	 	PRIMARY KEY (id)
 	) DEFAULT CHARSET=utf8"
 )==true){
