@@ -5,6 +5,7 @@ ini_set('display_errors', 1);
 // ini_set('html_errors', 0);
     header('content-type:text/html;charset=utf-8');
 
+
 // $url = parse_url(getenv("CLEARDB_DATABASE_URL"));
 
 $server = "127.0.0.1";//$url["host"];
@@ -74,7 +75,7 @@ else{
 	    while($row = $result->fetch_array(MYSQLI_ASSOC)) {
 	            $myArray[] = $row;
 	    }
-	    echo json_encode($myArray);
+	    echo json_encode($myArray,JSON_UNESCAPED_UNICODE);
 		}
 }
 
