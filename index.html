@@ -38,6 +38,7 @@
 <body>
 	<div id="canvas-container">
 	<button style="position: fixed;"  onclick="selectColour()">Color</button>
+	<button id="drawmode" style="position: fixed; left:10%"  onclick="doMode()">DrawMode(normal)</button>
 	<button style="position: fixed; right:0;"  onclick="clearScreen()">Clear</button>
 	<button id='submit' style="position: fixed; bottom:0px; left:0px;"  onclick="doSubmit()">Submit</button>
 	<button id='next' style="position: fixed; bottom:0; left:25%;" onclick="doNext()">Next</button>
@@ -49,7 +50,9 @@
 
 	<script>
 //0,0 is top left in Canvas
-var DRAWING=1;var VIEWING=2;
+var DRAWING,NORMAL=1;
+var VIEWING,INVERTED=2;
+var DOUBLEINVERTED=3;
 var mobileRatio = 9/16;
 var height = window.innerHeight * window.devicePixelRatio;
 var width=window.innerWidth * window.devicePixelRatio;
@@ -71,6 +74,7 @@ var imgData;
 var options={};
 var globalangle=0;
 var mode=DRAWING;
+var drawMode=INVERTED;
 var viewCount=0;
 
 // Amazio
@@ -126,6 +130,21 @@ function doLike(){
 	clearScreen();
     mode=VIEWING;
     decodeDrawing(leaderboard[viewCount]);
+}
+
+function doMode(){
+	if(drawMode==NORMAL){
+		drawMode=INVERTED;
+		drawmode.innerText="DrawMode (Inverted)";
+	}else if (drawMode==INVERTED){
+		drawMode=DOUBLEINVERTED;
+		drawmode.innerText="DrawMode (2x Inverted)";
+	}
+	else{
+		drawMode=NORMAL;
+		drawmode.innerText="Draw Mode(Normal)";
+	}
+
 }
 
 function viewLatest(){
@@ -254,6 +273,13 @@ function drawGame(){
 
 		ctx.save();
 		ctx.translate(amazio.centerx, amazio.centery);
+		if(drawMode==INVERTED &&  i%2==1){
+			// ctx.scale(-1,1);
+			ctx.scale(1,-1); // just this for snowflake
+			
+
+		}
+		
 		ctx.rotate(angle);
 		ctx.fillStyle=options.colour;
 
