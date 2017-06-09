@@ -16,6 +16,14 @@
 	<meta property="og:image" content="http://nomossgames.com/amazio/meta/screenshot.png"/>
 	<!-- This game is inspired by a gfycat I saved.. Aim was to make a game in under an hour before I went out to Boris and Pete's party. Dec 17th 2016 -->
 	<!-- https://gfycat.com/ImpureOpulentBirdofparadise -->
+
+	<!--DONE 1 - Alternate option for mirroring?
+		2.5 Show saving progress
+		2 - Saving colours to draw history
+		3 - Color Swatch (3)
+		4 - Share Button (share my drawing with ID)
+		5 - Daily color limitations for everyone (tracked on backend)
+		6 - Polish for release (UI + Icon, etc.) -->
 	<!-- Here goes! -->
 	<style>
 		html,body{
@@ -37,7 +45,7 @@
 
 <body>
 	<div id="canvas-container">
-	<button style="position: fixed;"  onclick="selectColour()">Color</button>
+	<input type="color" id="colour" name="colour" style="position: fixed; left:0;border: 0;padding: 0;width: 10%; height: 5%;" onchange="getColorVal(colour.value)"></button>
 	<button id="drawmode" style="position: fixed; left:10%"  onclick="doMode()">DrawMode(normal)</button>
 	<button style="position: fixed; right:0;"  onclick="clearScreen()">Clear</button>
 	<button id='submit' style="position: fixed; bottom:0px; left:0px;"  onclick="doSubmit()">Submit</button>
@@ -107,13 +115,19 @@ function init() {
 }
 
 function selectColour(){
-	options.colour=window.prompt("Type a colour to change to (name or #hex)","red");
-	drawHistory.push(options.colour)
+	// options.colour=window.prompt("Type a colour to change to (name or #hex)","red");
+	
+}
+function getColorVal(colorValue){
+	options.colour=colorValue;
+    drawHistory.push(options.colour)
 }
 
 function doSubmit(){	
 	console.log(JSON.stringify(drawHistory));
-	submit.style.display="none";
+	// submit.style.display="none";
+	submit.disabled=true;
+	submit.innerText="Submitting...";
 	postDrawing();
 }
 
@@ -190,8 +204,8 @@ function postDrawing(){
 	var request = new XMLHttpRequest();
 	request.open('POST', 'drawing.php', true);
 	request.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded; charset=UTF-8');
-	request.onload = function() {
-		// getHighScores();
+	request.onload = function() {		
+		submit.innerText="Done!";
 	};
 	request.send("name="+name+"&width="+window.innerWidth + "&height=" + window.innerHeight+ "&data="+ encodeDrawHistory());
 }
@@ -213,7 +227,9 @@ function encodeDrawHistory(){
 }
 
 function clearScreen(){
-	submit.style.display="block";
+	// submit.style.display="block";
+	submit.disabled=false;
+	submit.innerText="Submit";
 	console.log("clearing");
 	mode=DRAWING;
 	var ctx = canvas.getContext("2d");	
@@ -238,6 +254,8 @@ function clearScreen(){
 	}
 	window.requestAnimationFrame(drawGame);
 	drawHistory=[];
+	//insert starting draw mode and colour
+	// drawHistory.push({x:8000,y:})
 
 }
 
